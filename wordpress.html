@@ -1,0 +1,999 @@
+
+<!--https://www.oomphinc.com/work/--_>
+//demo theme create
+https://underscores.me/
+
+
+<?php
+//navigation create
+<?php
+			wp_nav_menu( array(
+				'theme_location' => 'menu-1',
+				'menu_id'        => 'primary-menu',
+			) );
+			?>
+
+
+
+//remove autoupdate
+define( 'WP_AUTO_UPDATE_CORE', false );
+
+//redirect to a page url when site load
+$url = 'http://localhost/telqglobal/blogs/';
+wp_redirect($url);
+//redirect to a page url when site load
+
+
+// limit navigation in same category
+the_post_navigation(
+					array(
+						'prev_text' => '<span class="screen-reader-text">' . __( 'Previous Post', 'twentyseventeen' ) . '</span><span aria-hidden="true" class="nav-subtitle">' . __( 'Go Back', 'twentyseventeen' ) . '</span> <span class="nav-title"><span class="nav-title-icon-wrapper">' . twentyseventeen_get_svg( array( 'icon' => 'arrow-left' ) ) . '</span></span>',
+						'next_text' => '<span class="screen-reader-text">' . __( 'Next Post', 'twentyseventeen' ) . '</span><span aria-hidden="true" class="nav-subtitle">' . __( 'Next', 'twentyseventeen' ) . '</span> <span class="nav-title"><span class="nav-title-icon-wrapper">' . twentyseventeen_get_svg( array( 'icon' => 'arrow-right' ) ) . '</span></span>',
+						 'in_same_term' => true
+					)
+				);
+				
+	// limit navigation in same category			
+				
+// set custom post as homepage
+add_filter( 'pre_get_posts', 'my_get_posts' );
+
+function my_get_posts( $query ) {
+	if ( is_home()&& false == $query->query_vars['suppress_filters'] )
+		$query->set( 'post_type', array( 'photos' ) );
+
+	return $query;
+}
+// set custom post as homepage
+
+
+
+//if ftp credentials asked for plugin add update add this in config file
+define('FS_METHOD','direct');
+//if ftp credentials asked for plugin add update
+		
+// Get a list of all terms in a taxonomy
+$terms = get_terms('Wordlist');
+
+echo '<ul class="tag-in-content">';
+foreach ($terms as $term) {
+    echo '<li><a href="'.get_term_link($term).'">'.$term->name.'</a></li>';
+}
+echo '</ul>';
+
+// Get a list of all terms in a taxonomy
+
+//add javascript in specific page
+
+add_action( 'wp_enqueue_scripts', 'excitor_enqueue_styles' );
+function wpb_hook_javascript() {
+  if (is_page ('2601')) { 
+    ?>
+        <script type="text/javascript">
+          jQuery(document).ready(function(){
+  jQuery("#icon1 img").click(function(){
+    jQuery("#popup1").toggle();
+  });
+});
+
+        </script>
+    <?php
+  }
+}
+add_action('wp_head', 'wpb_hook_javascript');
+//add javascript in specific page
+// set featured image from content image
+function auto_featured_image() {
+    global $post;
+ 
+    if (!has_post_thumbnail($post->ID)) {
+        $attached_image = get_children( "post_parent=$post->ID&amp;post_type=attachment&amp;post_mime_type=image&amp;numberposts=1" );
+         
+      if ($attached_image) {
+              foreach ($attached_image as $attachment_id => $attachment) {
+                   set_post_thumbnail($post->ID, $attachment_id);
+              }
+         }
+    }
+}
+// Use it temporary to generate all featured images
+//https://www.gavick.com/blog/wordpress-automatically-set-post-featured-image
+add_action('the_post', 'auto_featured_image');
+// Used for new posts
+add_action('save_post', 'auto_featured_image');
+add_action('draft_to_publish', 'auto_featured_image');
+add_action('new_to_publish', 'auto_featured_image');
+add_action('pending_to_publish', 'auto_featured_image');
+add_action('future_to_publish', 'auto_featured_image');
+// set featured image from content image
+
+
+//acf plugin slug code in .php page
+<?php the_field('jumbotron-title'); ?> 
+
+//acf plugin slug code in .php page
+// taxonomy list
+<?php if (get_the_term_list( $post->ID, 'Wordlist' ) != null ) { ?>
+			<div class="tag-in-content"><strong>Wordlist: </strong><?php echo get_the_term_list( $post->ID, 'Wordlist', '' );
+			?></div>
+				<?php } ?>	
+// taxonomy list associated with that post , single page on daily vocab
+
+// taxonomy and custom post
+
+add_action('init', 'vocab_articles_init');
+function vocab_articles_init() 
+{
+	$articles_labels = array(
+		'name' => _x('Articles', 'post type general name'),
+		'singular_name' => _x('Article', 'post type singular name'),
+		'all_items' => __('All Articles'),
+		'add_new' => _x('Add new article', 'articles'),
+		'add_new_item' => __('Add new article'),
+		'edit_item' => __('Edit article'),
+		'new_item' => __('New article'),
+		'view_item' => __('View article'),
+		'search_items' => __('Search in articles'),
+		'not_found' =>  __('No articles found'),
+		'not_found_in_trash' => __('No articles found in trash'), 
+		'parent_item_colon' => ''
+	);
+
+	$args = array(
+	'has_archive' => true,
+		'labels' => $articles_labels,
+		'public' => true,
+		'publicly_queryable' => true,
+		'show_ui' => true, 
+		'query_var' => true,
+		'rewrite' => true,
+		'capability_type' => 'post',
+		'hierarchical' => false,
+		'menu_position' => 5,
+		'supports' => array('title','editor','author','thumbnail','excerpt','comments','custom-fields'),
+		'has_archive' => 'articles'
+	); 
+	register_post_type('articles',$args);
+}
+
+// Add new post type for Photos
+add_action('init', 'vocab_photos_init');
+function vocab_Photos_init() 
+{
+	$photo_labels = array(
+		'name' => _x('Photos', 'post type general name'),
+		'singular_name' => _x('Photo', 'post type singular name'),
+		'all_items' => __('All Photos'),
+		'has_archive' => true,
+		'add_new' => _x('Add new photo', 'photos'),
+		'add_new_item' => __('Add new photo'),
+		'edit_item' => __('Edit photo'),
+		'new_item' => __('New photo'),
+		'view_item' => __('View photo'),
+		'search_items' => __('Search in photos'),
+		'not_found' =>  __('No photos found'),
+		'not_found_in_trash' => __('No photos found in trash'), 
+		'parent_item_colon' => ''
+	);
+	$args = array(
+	'has_archive' => true,
+		'labels' => $photo_labels,
+		'public' => true,
+		'publicly_queryable' => true,
+		'show_ui' => true, 
+		'query_var' => true,
+		'rewrite' => true,
+		'capability_type' => 'post',
+		'hierarchical' => false,
+		'menu_position' => 5,
+		'supports' => array('title','editor','author','thumbnail','excerpt','comments','custom-fields'),
+		'has_archive' => 'photos'
+	); 
+	register_post_type('photos',$args);
+}
+
+// Add new post type for Videos
+add_action('init', 'vocab_videos_init');
+function vocab_videos_init() 
+{
+	$video_labels = array(
+		'name' => _x('Videos', 'post type general name'),
+		'singular_name' => _x('Video', 'post type singular name'),
+		'all_items' => __('All Videos'),
+		'add_new' => _x('Add new video', 'videos'),
+		'add_new_item' => __('Add new video'),
+		'edit_item' => __('Edit video'),
+		'new_item' => __('New video'),
+		
+		'view_item' => __('View video'),
+		'search_items' => __('Search in videos'),
+		'not_found' =>  __('No videos found'),
+		'not_found_in_trash' => __('No videos found in trash'), 
+		'parent_item_colon' => ''
+	);
+	$args = array(
+		'has_archive' => true,
+		'labels' => $video_labels,
+		'public' => true,
+		'publicly_queryable' => true,
+		'show_ui' => true, 
+		'query_var' => true,
+		'rewrite' => true,
+		'capability_type' => 'post',
+		'hierarchical' => false,
+		'menu_position' => 5,
+		'supports' => array('title','editor','author','thumbnail','excerpt','comments','custom-fields'),
+		'has_archive' => 'videos'
+	); 
+	register_post_type('videos',$args);
+}
+
+// Add custom taxonomies
+add_action( 'init', 'vocab_create_taxonomies', 0 );
+
+function vocab_create_taxonomies() 
+{
+	// Frquency type  high/medium/low
+	$frequency_labels = array(
+		'name' => _x( 'Frequency level', 'taxonomy general name' ),
+		'singular_name' => _x( 'Frequency level', 'taxonomy singular name' ),
+		'search_items' =>  __( 'Search in frquency level' ),
+		'all_items' => __( 'All frequency levels' ),
+		'most_used_items' => null,
+		'parent_item' => null,
+		'parent_item_colon' => null,
+		'edit_item' => __( 'Edit frequency level' ), 
+		'update_item' => __( 'Update frequency level' ),
+		'add_new_item' => __( 'Add new frequency level' ),
+		'new_item_name' => __( 'New frequency level' ),
+		'menu_name' => __( 'Frequency level' ),
+	);	
+		register_taxonomy('frequency-level',array('photos','videos'),array(
+		'has_archive' => true,
+		'hierarchical' => true,
+		'labels' => $frequency_labels,
+		'show_ui' => true,
+		'query_var' => true,
+		'rewrite' => array('slug' => 'frequency-level' )
+	));
+	
+	// Level of difficulty type
+	$difficulty_labels = array(
+		'name' => _x( 'Difficulty level', 'taxonomy general name' ),
+		'singular_name' => _x( 'Difficulty level', 'taxonomy singular name' ),
+		'search_items' =>  __( 'Search in difficulty level' ),
+		'all_items' => __( 'All difficulty levels' ),
+		'most_used_items' => null,
+		'parent_item' => null,
+		'parent_item_colon' => null,
+		'edit_item' => __( 'Edit difficulty level' ), 
+		'update_item' => __( 'Update difficulty level' ),
+		'add_new_item' => __( 'Add new difficulty level' ),
+		'new_item_name' => __( 'New difficulty level' ),
+		'menu_name' => __( 'Difficulty level' ),
+	);	
+		register_taxonomy('difficulty-level',array('photos','videos'),array(
+		'has_archive' => true,
+		'hierarchical' => true,
+		'labels' => $difficulty_labels,
+		'show_ui' => true,
+		'query_var' => true,
+		'has_archive' => true,
+		'rewrite' => array('slug' => 'difficulty-level' )
+	));
+	
+	
+	//Non-hierarchial post type for Wordlist - GRE/CAT/etc:
+
+	// Wordlist
+	$wordlist_labels = array(
+		'name' => _x( 'Wordlist', 'taxonomy general name' ),
+		'singular_name' => _x( 'Wordlist', 'taxonomy singular name' ),
+		'search_items' =>  __( 'Search in wordlist' ),
+		'popular_items' => __( 'Popular wordlist' ),
+		'all_items' => __( 'All wordlist' ),
+		'most_used_items' => null,
+		'parent_item' => null,
+		'parent_item_colon' => null,
+		'edit_item' => __( 'Edit wordlist' ), 
+		'update_item' => __( 'Update wordlist' ),
+		'add_new_item' => __( 'Add new wordlist' ),
+		'new_item_name' => __( 'New wordlist name' ),
+		'separate_items_with_commas' => __( 'Separate wordlist with commas' ),
+		'add_or_remove_items' => __( 'Add or remove wordlist' ),
+		'choose_from_most_used' => __( 'Choose from the most used wordlist' ),
+		'menu_name' => __( 'Wordlist' ),
+	);
+	register_taxonomy('Wordlist',array('photos','videos'),array(
+		'has_archive' => true,
+		'hierarchical' => false,
+		'labels' => $wordlist_labels,
+		'show_ui' => true,
+		'update_count_callback' => '_update_post_term_count',
+		'query_var' => true,
+		'rewrite' => array('slug' => 'wordlist' )
+	));
+	
+	
+	// Content Type
+	$content_labels = array(
+		'name' => _x( 'Content Type', 'taxonomy general name' ),
+		'singular_name' => _x( 'Content Type', 'taxonomy singular name' ),
+		'search_items' =>  __( 'Search in content type' ),
+		'popular_items' => __( 'Popular content type' ),
+		'all_items' => __( 'All content type' ),
+		'most_used_items' => null,
+		'parent_item' => null,
+		'parent_item_colon' => null,
+		'edit_item' => __( 'Edit content type' ), 
+		'update_item' => __( 'Update content type' ),
+		'add_new_item' => __( 'Add new content type' ),
+		'new_item_name' => __( 'New content type name' ),
+		'separate_items_with_commas' => __( 'Separate content type with commas' ),
+		'add_or_remove_items' => __( 'Add or remove content type' ),
+		'choose_from_most_used' => __( 'Choose from the most used content type' ),
+		'menu_name' => __( 'Content type' ),
+	);
+	register_taxonomy('content-type',array('photos','videos'),array(
+	'has_archive' => true,
+		'hierarchical' => false,
+		'labels' => $content_labels,
+		'show_ui' => true,
+		'has_archive' => true,
+		'update_count_callback' => '_update_post_term_count',
+		'query_var' => true,
+		'rewrite' => array('slug' => 'content-type' )
+	));
+	
+	// Synonyms
+	$Synonyms = array(
+		'name' => _x( 'synonyms', 'taxonomy general name' ),
+		'singular_name' => _x( 'synonym', 'taxonomy singular name' ),
+		'search_items' =>  __( 'Search in synonyms' ),
+		'popular_items' => __( 'Popular synonyms' ),
+		'all_items' => __( 'All synonyms' ),
+		'most_used_items' => null,
+		'parent_item' => null,
+		'parent_item_colon' => null,
+		'edit_item' => __( 'Edit synonyms' ), 
+		'update_item' => __( 'Update synonyms' ),
+		'add_new_item' => __( 'Add new synonyms' ),
+		'new_item_name' => __( 'New synonyms name' ),
+		'separate_items_with_commas' => __( 'Separate synonyms with commas' ),
+		'add_or_remove_items' => __( 'Add or remove synonyms' ),
+		'choose_from_most_used' => __( 'Choose from the most used synonyms' ),
+		'menu_name' => __( 'Synonyms' ),
+	);
+	register_taxonomy('synonyms',array('photos','videos'),array(
+	'has_archive' => true,
+		'hierarchical' => false,
+		'labels' => $Synonyms,
+		'show_ui' => true,
+		'update_count_callback' => '_update_post_term_count',
+		'query_var' => true,
+		'rewrite' => array('slug' => 'Synonyms' )
+	));
+	
+	// Antonyms
+	$Antonyms = array(
+		'name' => _x( 'antonyms', 'taxonomy general name' ),
+		'singular_name' => _x( 'antonyms', 'taxonomy singular name' ),
+		'search_items' =>  __( 'Search in antonyms' ),
+		'popular_items' => __( 'Popular antonyms' ),
+		'all_items' => __( 'All antonyms' ),
+		'most_used_items' => null,
+		'parent_item' => null,
+		'parent_item_colon' => null,
+		'edit_item' => __( 'Edit antonyms' ), 
+		'update_item' => __( 'Update antonyms' ),
+		'add_new_item' => __( 'Add new antonyms' ),
+		'new_item_name' => __( 'New antonyms name' ),
+		'separate_items_with_commas' => __( 'Separate antonyms with commas' ),
+		'add_or_remove_items' => __( 'Add or remove antonyms' ),
+		'choose_from_most_used' => __( 'Choose from the most used antonyms' ),
+		'menu_name' => __( 'Antonyms' ),
+	);
+	register_taxonomy('antonyms',array('photos','videos'),array(
+		'has_archive' => true,
+		'hierarchical' => false,
+		'labels' => $Antonyms,
+		'show_ui' => true,
+		'update_count_callback' => '_update_post_term_count',
+		'query_var' => true,
+		'rewrite' => array('slug' => 'Antonyms' )
+	));
+	
+}
+// taxonomy and custom post
+//https://www.wp-hasty.com/ generator
+
+//manually create user
+https://www.youtube.com/watch?v=Gb7emagNd68
+// guest post allow
+https://www.youtube.com/watch?v=JYY2YDoAKo8
+?>
+
+
+
+
+
+<!--https://www.oomphinc.com/work/--_>
+
+
+
+<?php
+//remove autoupdate
+define( 'WP_AUTO_UPDATE_CORE', false );
+
+//redirect to a page url when site load
+$url = 'http://localhost/telqglobal/blogs/';
+wp_redirect($url);
+//redirect to a page url when site load
+
+
+// limit navigation in same category
+the_post_navigation(
+array(
+'prev_text' => '<span class="screen-reader-text">' . __( 'Previous Post', 'twentyseventeen' ) . '</span><span aria-hidden="true" class="nav-subtitle">' . __( 'Go Back', 'twentyseventeen' ) . '</span> <span class="nav-title"><span class="nav-title-icon-wrapper">' . twentyseventeen_get_svg( array( 'icon' => 'arrow-left' ) ) . '</span></span>',
+'next_text' => '<span class="screen-reader-text">' . __( 'Next Post', 'twentyseventeen' ) . '</span><span aria-hidden="true" class="nav-subtitle">' . __( 'Next', 'twentyseventeen' ) . '</span> <span class="nav-title"><span class="nav-title-icon-wrapper">' . twentyseventeen_get_svg( array( 'icon' => 'arrow-right' ) ) . '</span></span>',
+'in_same_term' => true
+)
+				);
+				
+	// limit navigation in same category			
+				
+// set custom post as homepage
+add_filter( 'pre_get_posts', 'my_get_posts' );
+
+function my_get_posts( $query ) {
+	if ( is_home()&& false == $query->query_vars['suppress_filters'] )
+		$query->set( 'post_type', array( 'photos' ) );
+
+	return $query;
+}
+// set custom post as homepage
+
+
+
+//if ftp credentials asked for plugin add update add this in config file
+define('FS_METHOD','direct');
+//if ftp credentials asked for plugin add update
+		
+// Get a list of all terms in a taxonomy
+$terms = get_terms('Wordlist');
+
+echo '<ul class="tag-in-content">';
+foreach ($terms as $term) {
+    echo '<li><a href="'.get_term_link($term).'">'.$term->name.'</a></li>';
+}
+echo '</ul>';
+
+// Get a list of all terms in a taxonomy
+
+//add javascript in specific page
+
+add_action( 'wp_enqueue_scripts', 'excitor_enqueue_styles' );
+function wpb_hook_javascript() {
+  if (is_page ('2601')) { 
+    ?>
+        <script type="text/javascript">
+          jQuery(document).ready(function(){
+  jQuery("#icon1 img").click(function(){
+    jQuery("#popup1").toggle();
+  });
+});
+
+        </script>
+    <?php
+  }
+}
+add_action('wp_head', 'wpb_hook_javascript');
+//add javascript in specific page
+// set featured image from content image
+function auto_featured_image() {
+    global $post;
+ 
+    if (!has_post_thumbnail($post->ID)) {
+        $attached_image = get_children( "post_parent=$post->ID&amp;post_type=attachment&amp;post_mime_type=image&amp;numberposts=1" );
+         
+      if ($attached_image) {
+              foreach ($attached_image as $attachment_id => $attachment) {
+                   set_post_thumbnail($post->ID, $attachment_id);
+              }
+         }
+    }
+}
+// Use it temporary to generate all featured images
+//https://www.gavick.com/blog/wordpress-automatically-set-post-featured-image
+add_action('the_post', 'auto_featured_image');
+// Used for new posts
+add_action('save_post', 'auto_featured_image');
+add_action('draft_to_publish', 'auto_featured_image');
+add_action('new_to_publish', 'auto_featured_image');
+add_action('pending_to_publish', 'auto_featured_image');
+add_action('future_to_publish', 'auto_featured_image');
+// set featured image from content image
+
+
+//acf plugin slug code in .php page
+<?php the_field('jumbotron-title'); ?> 
+
+//acf plugin slug code in .php page
+// taxonomy list
+<?php if (get_the_term_list( $post->ID, 'Wordlist' ) != null ) { ?>
+<div class="tag-in-content"><strong>Wordlist: </strong><?php echo get_the_term_list( $post->ID, 'Wordlist', '' );
+?></div>
+<?php } ?>	
+// taxonomy list associated with that post , single page on daily vocab
+
+// taxonomy and custom post
+
+add_action('init', 'vocab_articles_init');
+function vocab_articles_init() 
+{
+	$articles_labels = array(
+		'name' => _x('Articles', 'post type general name'),
+		'singular_name' => _x('Article', 'post type singular name'),
+		'all_items' => __('All Articles'),
+		'add_new' => _x('Add new article', 'articles'),
+		'add_new_item' => __('Add new article'),
+		'edit_item' => __('Edit article'),
+		'new_item' => __('New article'),
+		'view_item' => __('View article'),
+		'search_items' => __('Search in articles'),
+		'not_found' =>  __('No articles found'),
+		'not_found_in_trash' => __('No articles found in trash'), 
+		'parent_item_colon' => ''
+	);
+
+	$args = array(
+	'has_archive' => true,
+		'labels' => $articles_labels,
+		'public' => true,
+		'publicly_queryable' => true,
+		'show_ui' => true, 
+		'query_var' => true,
+		'rewrite' => true,
+		'capability_type' => 'post',
+		'hierarchical' => false,
+		'menu_position' => 5,
+		'supports' => array('title','editor','author','thumbnail','excerpt','comments','custom-fields'),
+		'has_archive' => 'articles'
+	); 
+	register_post_type('articles',$args);
+}
+
+// Add new post type for Photos
+add_action('init', 'vocab_photos_init');
+function vocab_Photos_init() 
+{
+	$photo_labels = array(
+		'name' => _x('Photos', 'post type general name'),
+		'singular_name' => _x('Photo', 'post type singular name'),
+		'all_items' => __('All Photos'),
+		'has_archive' => true,
+		'add_new' => _x('Add new photo', 'photos'),
+		'add_new_item' => __('Add new photo'),
+		'edit_item' => __('Edit photo'),
+		'new_item' => __('New photo'),
+		'view_item' => __('View photo'),
+		'search_items' => __('Search in photos'),
+		'not_found' =>  __('No photos found'),
+		'not_found_in_trash' => __('No photos found in trash'), 
+		'parent_item_colon' => ''
+	);
+	$args = array(
+	'has_archive' => true,
+		'labels' => $photo_labels,
+		'public' => true,
+		'publicly_queryable' => true,
+		'show_ui' => true, 
+		'query_var' => true,
+		'rewrite' => true,
+		'capability_type' => 'post',
+		'hierarchical' => false,
+		'menu_position' => 5,
+		'supports' => array('title','editor','author','thumbnail','excerpt','comments','custom-fields'),
+		'has_archive' => 'photos'
+	); 
+	register_post_type('photos',$args);
+}
+
+// Add new post type for Videos
+add_action('init', 'vocab_videos_init');
+function vocab_videos_init() 
+{
+	$video_labels = array(
+		'name' => _x('Videos', 'post type general name'),
+		'singular_name' => _x('Video', 'post type singular name'),
+		'all_items' => __('All Videos'),
+		'add_new' => _x('Add new video', 'videos'),
+		'add_new_item' => __('Add new video'),
+		'edit_item' => __('Edit video'),
+		'new_item' => __('New video'),
+		
+		'view_item' => __('View video'),
+		'search_items' => __('Search in videos'),
+		'not_found' =>  __('No videos found'),
+		'not_found_in_trash' => __('No videos found in trash'), 
+		'parent_item_colon' => ''
+	);
+	$args = array(
+		'has_archive' => true,
+		'labels' => $video_labels,
+		'public' => true,
+		'publicly_queryable' => true,
+		'show_ui' => true, 
+		'query_var' => true,
+		'rewrite' => true,
+		'capability_type' => 'post',
+		'hierarchical' => false,
+		'menu_position' => 5,
+		'supports' => array('title','editor','author','thumbnail','excerpt','comments','custom-fields'),
+		'has_archive' => 'videos'
+	); 
+	register_post_type('videos',$args);
+}
+
+// Add custom taxonomies
+add_action( 'init', 'vocab_create_taxonomies', 0 );
+
+function vocab_create_taxonomies() 
+{
+	// Frquency type  high/medium/low
+	$frequency_labels = array(
+		'name' => _x( 'Frequency level', 'taxonomy general name' ),
+		'singular_name' => _x( 'Frequency level', 'taxonomy singular name' ),
+		'search_items' =>  __( 'Search in frquency level' ),
+		'all_items' => __( 'All frequency levels' ),
+		'most_used_items' => null,
+		'parent_item' => null,
+		'parent_item_colon' => null,
+		'edit_item' => __( 'Edit frequency level' ), 
+		'update_item' => __( 'Update frequency level' ),
+		'add_new_item' => __( 'Add new frequency level' ),
+		'new_item_name' => __( 'New frequency level' ),
+		'menu_name' => __( 'Frequency level' ),
+	);	
+		register_taxonomy('frequency-level',array('photos','videos'),array(
+		'has_archive' => true,
+		'hierarchical' => true,
+		'labels' => $frequency_labels,
+		'show_ui' => true,
+		'query_var' => true,
+		'rewrite' => array('slug' => 'frequency-level' )
+	));
+	
+	// Level of difficulty type
+	$difficulty_labels = array(
+		'name' => _x( 'Difficulty level', 'taxonomy general name' ),
+		'singular_name' => _x( 'Difficulty level', 'taxonomy singular name' ),
+		'search_items' =>  __( 'Search in difficulty level' ),
+		'all_items' => __( 'All difficulty levels' ),
+		'most_used_items' => null,
+		'parent_item' => null,
+		'parent_item_colon' => null,
+		'edit_item' => __( 'Edit difficulty level' ), 
+		'update_item' => __( 'Update difficulty level' ),
+		'add_new_item' => __( 'Add new difficulty level' ),
+		'new_item_name' => __( 'New difficulty level' ),
+		'menu_name' => __( 'Difficulty level' ),
+	);	
+		register_taxonomy('difficulty-level',array('photos','videos'),array(
+		'has_archive' => true,
+		'hierarchical' => true,
+		'labels' => $difficulty_labels,
+		'show_ui' => true,
+		'query_var' => true,
+		'has_archive' => true,
+		'rewrite' => array('slug' => 'difficulty-level' )
+	));
+	
+	
+	//Non-hierarchial post type for Wordlist - GRE/CAT/etc:
+
+	// Wordlist
+	$wordlist_labels = array(
+		'name' => _x( 'Wordlist', 'taxonomy general name' ),
+		'singular_name' => _x( 'Wordlist', 'taxonomy singular name' ),
+		'search_items' =>  __( 'Search in wordlist' ),
+		'popular_items' => __( 'Popular wordlist' ),
+		'all_items' => __( 'All wordlist' ),
+		'most_used_items' => null,
+		'parent_item' => null,
+		'parent_item_colon' => null,
+		'edit_item' => __( 'Edit wordlist' ), 
+		'update_item' => __( 'Update wordlist' ),
+		'add_new_item' => __( 'Add new wordlist' ),
+		'new_item_name' => __( 'New wordlist name' ),
+		'separate_items_with_commas' => __( 'Separate wordlist with commas' ),
+		'add_or_remove_items' => __( 'Add or remove wordlist' ),
+		'choose_from_most_used' => __( 'Choose from the most used wordlist' ),
+		'menu_name' => __( 'Wordlist' ),
+	);
+	register_taxonomy('Wordlist',array('photos','videos'),array(
+		'has_archive' => true,
+		'hierarchical' => false,
+		'labels' => $wordlist_labels,
+		'show_ui' => true,
+		'update_count_callback' => '_update_post_term_count',
+		'query_var' => true,
+		'rewrite' => array('slug' => 'wordlist' )
+	));
+	
+	
+	// Content Type
+	$content_labels = array(
+		'name' => _x( 'Content Type', 'taxonomy general name' ),
+		'singular_name' => _x( 'Content Type', 'taxonomy singular name' ),
+		'search_items' =>  __( 'Search in content type' ),
+		'popular_items' => __( 'Popular content type' ),
+		'all_items' => __( 'All content type' ),
+		'most_used_items' => null,
+		'parent_item' => null,
+		'parent_item_colon' => null,
+		'edit_item' => __( 'Edit content type' ), 
+		'update_item' => __( 'Update content type' ),
+		'add_new_item' => __( 'Add new content type' ),
+		'new_item_name' => __( 'New content type name' ),
+		'separate_items_with_commas' => __( 'Separate content type with commas' ),
+		'add_or_remove_items' => __( 'Add or remove content type' ),
+		'choose_from_most_used' => __( 'Choose from the most used content type' ),
+		'menu_name' => __( 'Content type' ),
+	);
+	register_taxonomy('content-type',array('photos','videos'),array(
+	'has_archive' => true,
+		'hierarchical' => false,
+		'labels' => $content_labels,
+		'show_ui' => true,
+		'has_archive' => true,
+		'update_count_callback' => '_update_post_term_count',
+		'query_var' => true,
+		'rewrite' => array('slug' => 'content-type' )
+	));
+	
+	// Synonyms
+	$Synonyms = array(
+		'name' => _x( 'synonyms', 'taxonomy general name' ),
+		'singular_name' => _x( 'synonym', 'taxonomy singular name' ),
+		'search_items' =>  __( 'Search in synonyms' ),
+		'popular_items' => __( 'Popular synonyms' ),
+		'all_items' => __( 'All synonyms' ),
+		'most_used_items' => null,
+		'parent_item' => null,
+		'parent_item_colon' => null,
+		'edit_item' => __( 'Edit synonyms' ), 
+		'update_item' => __( 'Update synonyms' ),
+		'add_new_item' => __( 'Add new synonyms' ),
+		'new_item_name' => __( 'New synonyms name' ),
+		'separate_items_with_commas' => __( 'Separate synonyms with commas' ),
+		'add_or_remove_items' => __( 'Add or remove synonyms' ),
+		'choose_from_most_used' => __( 'Choose from the most used synonyms' ),
+		'menu_name' => __( 'Synonyms' ),
+	);
+	register_taxonomy('synonyms',array('photos','videos'),array(
+	'has_archive' => true,
+		'hierarchical' => false,
+		'labels' => $Synonyms,
+		'show_ui' => true,
+		'update_count_callback' => '_update_post_term_count',
+		'query_var' => true,
+		'rewrite' => array('slug' => 'Synonyms' )
+	));
+	
+	// Antonyms
+	$Antonyms = array(
+		'name' => _x( 'antonyms', 'taxonomy general name' ),
+		'singular_name' => _x( 'antonyms', 'taxonomy singular name' ),
+		'search_items' =>  __( 'Search in antonyms' ),
+		'popular_items' => __( 'Popular antonyms' ),
+		'all_items' => __( 'All antonyms' ),
+		'most_used_items' => null,
+		'parent_item' => null,
+		'parent_item_colon' => null,
+		'edit_item' => __( 'Edit antonyms' ), 
+		'update_item' => __( 'Update antonyms' ),
+		'add_new_item' => __( 'Add new antonyms' ),
+		'new_item_name' => __( 'New antonyms name' ),
+		'separate_items_with_commas' => __( 'Separate antonyms with commas' ),
+		'add_or_remove_items' => __( 'Add or remove antonyms' ),
+		'choose_from_most_used' => __( 'Choose from the most used antonyms' ),
+		'menu_name' => __( 'Antonyms' ),
+	);
+	register_taxonomy('antonyms',array('photos','videos'),array(
+		'has_archive' => true,
+		'hierarchical' => false,
+		'labels' => $Antonyms,
+		'show_ui' => true,
+		'update_count_callback' => '_update_post_term_count',
+		'query_var' => true,
+		'rewrite' => array('slug' => 'Antonyms' )
+	));
+	
+}
+// taxonomy and custom post
+//https://www.wp-hasty.com/ generator
+
+//manually create user
+https://www.youtube.com/watch?v=Gb7emagNd68
+// guest post allow
+https://www.youtube.com/watch?v=JYY2YDoAKo8
+
+/*A taxonomy within WordPress is a way of grouping posts together
+ based on a select number of relationships. By default, a standard post 
+ will have two taxonomy types called Categories and Tags which are a handy way 
+ of ensuring related content on your website is easy for visitors to find. These 
+ two types of taxonomies are included in WordPress by default, but just like any other 
+ taxonomy, can be removed or changed and you can even add more if you like.
+
+Database of wordpress after install
+wp_users
+wp_usermeta
+wp_term_taxonomy
+wp_term_relationships
+wp_terms
+wp_termmeta
+wp_posts
+wp_postmeta
+wp_options
+wp_links
+wp_comments
+wp_commentmeta
+WordPress posts have an official publish date and are displayed by date on your site’s blog page.
+WordPress posts are for timely blog posts and have a publish date
+WordPress pages are for timeless static content and don’t have a publish date
+When you create a WordPress post, you have the option to assign it:
+•	Categories
+•	Tags
+Since WordPress version 3.1, posts have a feature called Post Formats. Essentially, these make it easy to style your post differently depending on the type of content. Usually, you’ll have formats for things like:
+•	Image
+•	Video
+•	Quote
+•	Gallery
+•	Etc.
+*/
+Two kinds of hooks exist: action hooks and filter hooks. Action hooks “hook in” actions, and filter hooks “hook in” filters.
+if (function_exists('register_sidebar'))
+{
+    
+	register_sidebar(
+		array(
+			'name'          => __( 'Main Sidebar', 'twentyeleven' ),
+			'id'            => 'sidebar-1',
+			'before_widget' => '<aside id="%1$s" class="widget %2$s">',
+			'after_widget'  => '</aside>',
+			'before_title'  => '<h3 class="widget-title">',
+			'after_title'   => '</h3>',
+		)
+	);
+	register_sidebar(
+		array(
+			'name'          => __( 'Showcase Sidebar', 'twentyeleven' ),
+			'id'            => 'sidebar-2',
+			'description'   => __( 'The sidebar for the optional Showcase Template', 'twentyeleven' ),
+			'before_widget' => '<aside id="%1$s" class="widget %2$s">',
+			'after_widget'  => '</aside>',
+			'before_title'  => '<h3 class="widget-title">',
+			'after_title'   => '</h3>',
+		)
+	);
+
+	register_sidebar(
+		array(
+			'name'          => __( 'Footer Area One', 'twentyeleven' ),
+			'id'            => 'sidebar-3',
+			'description'   => __( 'An optional widget area for your site footer', 'twentyeleven' ),
+			'before_widget' => '<aside id="%1$s" class="widget %2$s">',
+			'after_widget'  => '</aside>',
+			'before_title'  => '<h3 class="widget-title">',
+			'after_title'   => '</h3>',
+		)
+	);
+
+	register_sidebar(
+		array(
+			'name'          => __( 'Footer Area Two', 'twentyeleven' ),
+			'id'            => 'sidebar-4',
+			'description'   => __( 'An optional widget area for your site footer', 'twentyeleven' ),
+			'before_widget' => '<aside id="%1$s" class="widget %2$s">',
+			'after_widget'  => '</aside>',
+			'before_title'  => '<h3 class="widget-title">',
+			'after_title'   => '</h3>',
+		)
+	);
+
+	register_sidebar(
+		array(
+			'name'          => __( 'Footer Area Three', 'twentyeleven' ),
+			'id'            => 'sidebar-5',
+			'description'   => __( 'An optional widget area for your site footer', 'twentyeleven' ),
+			'before_widget' => '<aside id="%1$s" class="widget %2$s">',
+			'after_widget'  => '</aside>',
+			'before_title'  => '<h3 class="widget-title">',
+			'after_title'   => '</h3>',
+		)
+	);}
+                                   Navigation dynamic
+  <?php
+			wp_nav_menu( array(
+				'theme_location' => 'menu-1',
+				'menu_id'        => 'primary-menu',
+			) );
+			?>
+Meta boxes are handy, flexible, modular edit screen elements that can be used to collect information related to the post being edited. Your custom meta box will be on the same screen as all the other post related information; so a clear relationship is established.
+function wporg_add_custom_box()
+{
+    $screens = ['post', 'wporg_cpt'];
+    foreach ($screens as $screen) {
+        add_meta_box(
+            'wporg_box_id',           // Unique ID
+            'Custom Meta Box Title',  // Box title
+            'wporg_custom_box_html',  // Content callback, must be of type callable
+            $screen                   // Post type
+        );
+    }
+}
+add_action('add_meta_boxes', 'wporg_add_custom_box');
+
+//query in wordpress
+$results = $wpdb->get_results( "SELECT * FROM $wpdb->posts WHERE `post_type`='post' LIMIT 4" );
+
+//THE SAME LOOP USING WP_QUERY
+<?php
+
+   $args = array('cat' => 4);
+   $category_posts = new WP_Query($args);
+
+   if($category_posts->have_posts()) : 
+      while($category_posts->have_posts()) : 
+         $category_posts->the_post();
+?>
+
+         <h1><?php the_title() ?></h1>
+         <div class='post-content'><?php the_content() ?></div>      
+
+<?php
+
+      endwhile;
+   else: 
+?>
+
+      Oops, there are no posts.
+
+<?php
+   endif;
+?>
+//Activation #Activation
+To set up an activation hook, use the register_activation_hook() function:
+	register_activation_hook( __FILE__, 'pluginprefix_function_to_run' );
+Top ↑
+//Deactivation #Deactivation
+//To set up a deactivation hook, use the register_deactivation_hook() function:
+	register_deactivation_hook( __FILE__, 'pluginprefix_function_to_run' );
+//The first parameter in each of these functions refers to your main plugin file, which is the file in which you have placed the plugin header comment. Usually these two functions will be triggered from within the main plugin file; however, if the functions are placed in any other file, you must update the first parameter to correctly point to the main plugin file.
+
+function pluginprefix_setup_post_type() {
+    // register the "book" custom post type
+    register_post_type( 'book', ['public' => 'true'] );
+}
+add_action( 'init', 'pluginprefix_setup_post_type' );
+ 
+function pluginprefix_install() {
+    // trigger our function that registers the custom post type
+    pluginprefix_setup_post_type();
+ 
+    // clear the permalinks after the post type has been registered
+    flush_rewrite_rules();
+}
+
+//If you are unfamiliar with registering custom post types, don’t worry – this will be covered later. 
+//This example is used simply because it’s very common.
+//Using the example from above, the following is how to reverse this process and deactivate a plugin:
+	function pluginprefix_deactivation() {
+    // unregister the post type, so the rules are no longer in memory
+    unregister_post_type( 'book' );
+    // clear the permalinks to remove our post type's rules from the database
+    flush_rewrite_rules();
+}
+register_deactivation_hook( __FILE__, 'pluginprefix_deactivation' );
+
